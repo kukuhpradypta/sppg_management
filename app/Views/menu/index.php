@@ -30,7 +30,7 @@
                 <tr class="hover:bg-surface-container-lowest transition-colors">
                     <td class="px-5 py-3">
                         <?php if (!empty($m['foto_menu'])): ?>
-                        <img src="/<?= esc($m['foto_menu']) ?>" alt="Foto Menu" class="w-12 h-12 object-cover rounded-lg border border-outline-variant"/>
+                        <img src="/<?= esc($m['foto_menu']) ?>" alt="Foto Menu" class="w-12 h-12 object-cover rounded-lg border border-outline-variant cursor-pointer hover:opacity-80 transition-opacity" onclick="previewImage('/<?= esc($m['foto_menu']) ?>', '<?= esc($m['nama_menu'], 'js') ?>')"/>
                         <?php else: ?>
                         <div class="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-outline">restaurant</span></div>
                         <?php endif; ?>
@@ -54,6 +54,17 @@
         </table>
     </div>
     <div class="p-4 border-t border-outline-variant"><?= $pager->links() ?></div>
+</div>
+
+<!-- Image Preview Modal -->
+<div id="modal-preview" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 bg-black/70" onclick="closePreview()">
+    <div class="relative max-w-2xl max-h-[85vh] flex flex-col items-center" onclick="event.stopPropagation()">
+        <button onclick="closePreview()" class="absolute -top-3 -right-3 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-900 z-10">
+            <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+        <img id="preview-img" src="" alt="Preview" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl"/>
+        <p id="preview-title" class="mt-3 text-white text-sm font-medium text-center"></p>
+    </div>
 </div>
 
 <!-- Modal -->
@@ -114,6 +125,18 @@
 
 <?= $this->section('scripts') ?>
 <script>
+// Image preview lightbox
+function previewImage(src, title) {
+    document.getElementById('preview-img').src = src;
+    document.getElementById('preview-title').textContent = title;
+    document.getElementById('modal-preview').classList.remove('hidden');
+    document.getElementById('modal-preview').classList.add('flex');
+}
+function closePreview() {
+    document.getElementById('modal-preview').classList.add('hidden');
+    document.getElementById('modal-preview').classList.remove('flex');
+}
+
 function openModal() {
     document.getElementById('modal').classList.remove('hidden');
     document.getElementById('modal').classList.add('flex');
@@ -213,7 +236,7 @@ function refreshTable() {
                 const tgl = new Date(m.tanggal_menu).toLocaleDateString('id-ID');
                 const harga = Number(m.estimasi_harga_per_porsi).toLocaleString('id-ID');
                 const foto = m.foto_menu
-                    ? '<img src="/' + m.foto_menu + '" alt="Foto" class="w-12 h-12 object-cover rounded-lg border border-outline-variant"/>'
+                    ? '<img src="/' + m.foto_menu + '" alt="Foto" class="w-12 h-12 object-cover rounded-lg border border-outline-variant cursor-pointer hover:opacity-80 transition-opacity" onclick="previewImage(\'/' + m.foto_menu + '\', \'' + m.nama_menu.replace(/'/g, "\\'") + '\')"/>'
                     : '<div class="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-outline">restaurant</span></div>';
                 html += '<tr class="hover:bg-surface-container-lowest transition-colors">';
                 html += '<td class="px-5 py-3">' + foto + '</td>';
