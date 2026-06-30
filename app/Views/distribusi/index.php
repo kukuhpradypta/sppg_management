@@ -177,15 +177,37 @@ function editData(id) {
             document.getElementById('form-data').action = '/distribusi/update/' + id;
             document.getElementById('f_tanggal').value = data.tanggal_distribusi;
             document.getElementById('f_sekolah').value = data.sekolah_id;
-            document.getElementById('f_menu').value = data.menu_id;
             document.getElementById('f_porsi').value = data.jumlah_porsi;
             document.getElementById('f_catatan').value = data.catatan || '';
             document.getElementById('f_status').value = data.status;
             document.getElementById('status-wrap').classList.remove('hidden');
+
             <?php if (session()->get('role') === 'admin'): ?>
+            // Admin: set SPPG, fetch menu list for that SPPG, then set selected menu
             document.getElementById('f_sppg').value = data.sppg_id;
-            <?php endif; ?>
+            const menuSelect = document.getElementById('f_menu');
+            menuSelect.innerHTML = '<option value="">Memuat menu...</option>';
+            fetch('/distribusi/getMenuBySppg', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest'},
+                body: 'sppg_id=' + data.sppg_id + '&<?= csrf_token() ?>=<?= csrf_hash() ?>'
+            }).then(r => r.json()).then(menus => {
+                menuSelect.innerHTML = '<option value="">Pilih Menu</option>';
+                menus.forEach(m => {
+                    const o = document.createElement('option');
+                    o.value = m.id;
+                    o.setAttribute('data-harga', m.estimasi_harga_per_porsi);
+                    o.textContent = m.nama_menu + ' - Rp ' + parseInt(m.estimasi_harga_per_porsi).toLocaleString('id-ID');
+                    if (m.id == data.menu_id) o.selected = true;
+                    menuSelect.appendChild(o);
+                });
+                calcBiaya();
+            });
+            <?php else: ?>
+            // SPPG: menu list already rendered, just set value
+            document.getElementById('f_menu').value = data.menu_id;
             calcBiaya();
+            <?php endif; ?>
         });
 }
 document.getElementById('modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
