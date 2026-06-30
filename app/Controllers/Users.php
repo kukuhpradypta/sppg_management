@@ -21,6 +21,16 @@ class Users extends BaseController
         $role   = $this->request->getGet('role');
         $status = $this->request->getGet('status');
 
+        // Hitung stats pakai query builder langsung (bukan model instance)
+        // supaya tidak terpengaruh state JOIN dari query utama
+        $db = \Config\Database::connect();
+        $stats = [
+            'totalUser'  => $db->table('users')->where('deleted_at IS NULL', null, false)->countAllResults(),
+            'totalAdmin' => $db->table('users')->where('deleted_at IS NULL', null, false)->where('role', 'admin')->countAllResults(),
+            'totalSppg'  => $db->table('users')->where('deleted_at IS NULL', null, false)->where('role', 'sppg')->countAllResults(),
+            'totalAktif' => $db->table('users')->where('deleted_at IS NULL', null, false)->where('is_active', 1)->countAllResults(),
+        ];
+
         $builder = $this->userModel
             ->select('users.*, sppg.nama_sppg')
             ->join('sppg', 'sppg.id = users.sppg_id', 'left');
@@ -37,10 +47,10 @@ class Users extends BaseController
             'title'      => 'Manajemen User',
             'userList'   => $builder->paginate(10),
             'pager'      => $this->userModel->pager,
-            'totalUser'  => $this->userModel->countAllResults(false),
-            'totalAdmin' => $this->userModel->where('role', 'admin')->countAllResults(false),
-            'totalSppg'  => $this->userModel->where('role', 'sppg')->countAllResults(false),
-            'totalAktif' => $this->userModel->where('is_active', 1)->countAllResults(false),
+            'totalUser'  => $stats['totalUser'],
+            'totalAdmin' => $stats['totalAdmin'],
+            'totalSppg'  => $stats['totalSppg'],
+            'totalAktif' => $stats['totalAktif'],
             'sppgList'   => $this->sppgModel->getActiveSppg(),
         ];
 
@@ -82,11 +92,12 @@ class Users extends BaseController
             unset($row['password']);
         }
 
+        $db = \Config\Database::connect();
         $stats = [
-            'totalUser'  => $this->userModel->countAllResults(false),
-            'totalAdmin' => $this->userModel->where('role', 'admin')->countAllResults(false),
-            'totalSppg'  => $this->userModel->where('role', 'sppg')->countAllResults(false),
-            'totalAktif' => $this->userModel->where('is_active', 1)->countAllResults(false),
+            'totalUser'  => $db->table('users')->where('deleted_at IS NULL', null, false)->countAllResults(),
+            'totalAdmin' => $db->table('users')->where('deleted_at IS NULL', null, false)->where('role', 'admin')->countAllResults(),
+            'totalSppg'  => $db->table('users')->where('deleted_at IS NULL', null, false)->where('role', 'sppg')->countAllResults(),
+            'totalAktif' => $db->table('users')->where('deleted_at IS NULL', null, false)->where('is_active', 1)->countAllResults(),
         ];
 
         return $this->response->setJSON(['data' => $list, 'stats' => $stats]);

@@ -35,24 +35,24 @@
 
 <!-- Filter -->
 <div class="bg-surface-container-low p-4 rounded-t-xl border border-outline-variant border-b-0 flex flex-wrap gap-3 items-center">
-    <form method="GET" action="/users" class="flex gap-3 items-center">
+    <div class="flex gap-3 items-center">
         <div class="flex items-center gap-2 bg-white border border-outline-variant px-3 py-1 rounded-md">
             <span class="text-xs font-bold text-outline uppercase">Role</span>
-            <select name="role" class="border-none bg-transparent text-sm font-medium focus:ring-0 cursor-pointer" onchange="this.form.submit()">
+            <select id="filter-role" class="border-none bg-transparent text-sm font-medium focus:ring-0 cursor-pointer" onchange="refreshTable()">
                 <option value="Semua">Semua</option>
-                <option value="admin" <?= service('request')->getGet('role') === 'admin' ? 'selected' : '' ?>>Admin</option>
-                <option value="sppg"  <?= service('request')->getGet('role') === 'sppg'  ? 'selected' : '' ?>>SPPG</option>
+                <option value="admin">Admin</option>
+                <option value="sppg">SPPG</option>
             </select>
         </div>
         <div class="flex items-center gap-2 bg-white border border-outline-variant px-3 py-1 rounded-md">
             <span class="text-xs font-bold text-outline uppercase">Status</span>
-            <select name="status" class="border-none bg-transparent text-sm font-medium focus:ring-0 cursor-pointer" onchange="this.form.submit()">
+            <select id="filter-status" class="border-none bg-transparent text-sm font-medium focus:ring-0 cursor-pointer" onchange="refreshTable()">
                 <option value="Semua">Semua</option>
-                <option value="Aktif"    <?= service('request')->getGet('status') === 'Aktif'    ? 'selected' : '' ?>>Aktif</option>
-                <option value="Non-Aktif" <?= service('request')->getGet('status') === 'Non-Aktif' ? 'selected' : '' ?>>Non-Aktif</option>
+                <option value="Aktif">Aktif</option>
+                <option value="Non-Aktif">Non-Aktif</option>
             </select>
         </div>
-    </form>
+    </div>
 </div>
 
 <!-- Table -->
@@ -295,7 +295,12 @@ document.getElementById('form-data').addEventListener('submit', function(e) {
 });
 
 function refreshTable() {
-    const params = new URLSearchParams(window.location.search);
+    const role   = document.getElementById('filter-role').value;
+    const status = document.getElementById('filter-status').value;
+    const params = new URLSearchParams();
+    if (role   !== 'Semua') params.set('role', role);
+    if (status !== 'Semua') params.set('status', status);
+
     fetch('/users/data?' + params.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(r => r.json())
         .then(res => {
