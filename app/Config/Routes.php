@@ -15,6 +15,16 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     // Dashboard
     $routes->get('dashboard', 'Dashboard::index');
 
+    // Admin Only - Users
+    $routes->group('users', ['filter' => 'role:admin'], static function ($routes) {
+        $routes->get('/', 'Users::index');
+        $routes->get('get/(:num)', 'Users::getById/$1');
+        $routes->get('data', 'Users::getData');
+        $routes->post('store', 'Users::store');
+        $routes->post('update/(:num)', 'Users::update/$1');
+        $routes->get('delete/(:num)', 'Users::delete/$1');
+    });
+
     // Admin Only - Sekolah
     $routes->group('sekolah', ['filter' => 'role:admin'], static function ($routes) {
         $routes->get('/', 'Sekolah::index');

@@ -20,6 +20,11 @@
         </a>
 
         <?php if (session()->get('role') === 'admin'): ?>
+        <a class="flex items-center gap-3 px-6 py-3 <?= strpos($currentUrl, '/users') !== false ? 'text-secondary-fixed border-l-4 border-secondary-fixed bg-white/5' : 'text-on-primary/70 hover:text-on-primary hover:bg-white/5' ?> transition-all" href="/users">
+            <span class="material-symbols-outlined">manage_accounts</span>
+            <span class="text-sm font-medium">Users</span>
+        </a>
+
         <a class="flex items-center gap-3 px-6 py-3 <?= strpos($currentUrl, 'sekolah') !== false ? 'text-secondary-fixed border-l-4 border-secondary-fixed bg-white/5' : 'text-on-primary/70 hover:text-on-primary hover:bg-white/5' ?> transition-all" href="/sekolah">
             <span class="material-symbols-outlined">school</span>
             <span class="text-sm font-medium">Sekolah</span>
